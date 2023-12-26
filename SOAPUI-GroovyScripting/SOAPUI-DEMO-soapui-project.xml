@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="5a767b7b-21b5-4d94-b3f4-e2c4194d22f0" activeEnvironment="Default" name="SOAPUI DEMO" soapui-version="5.7.2" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:testSuite id="4ad5ea02-4c9a-4c12-9d91-ed3d1657c41b" name="TestSuite 1"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase id="78d8180e-e544-4871-bd1b-be051681bfc1" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Generic functions" searchProperties="true"><con:settings/><con:testStep type="groovy" name="Groovy Script" id="c7e9a411-e6e2-452c-a596-3875cd5cbd52"><con:settings/><con:config><script>import groovy.sql.Sql
+import org.apache.poi.ss.usermodel.*
+
+@Grab(group='org.apache.httpcomponents', module='httpclient', version='4.5.2')
+
+import groovy.json.*
+
+import org.apache.http.client.methods.*
+import org.apache.http.entity.*
+import org.apache.http.impl.client.*
+
+
+
+
+def readExcelData(excelFilePath, sheetName) {
+    // Create a workbook instance
+    Workbook workbook = WorkbookFactory.create(new FileInputStream(excelFilePath))
+    // Access the specified worksheet
+    Sheet sheet = workbook.getSheet(sheetName)
+
+    // Create a list to store data
+    def data = []
+
+    // Iterate through rows and cells, extracting values
+    int rowCount = sheet.getLastRowNum()
+    for (int i = 1; i &lt;= rowCount; i++) {
+        Row row = sheet.getRow(i)
+        Map&lt;String, String> rowData = [:]
+        int cellCount = row.getLastCellNum()
+        for (int j = 0; j &lt; cellCount; j++) {
+            Cell cell = row.getCell(j)
+            String cellValue = cell.getStringCellValue() // Handle other cell types as needed
+            rowData.put(headerCells[j], cellValue) // Assuming headerCells is a list of column names
+        }
+        data.add(rowData)
+    }
+
+    // Close the workbook
+    workbook.close()
+
+    return data
+}
+def excelData = readExcelData('C:/Users/Neeraja/Documents/SOAPUI-GroovyScripting/TestData.xlsx', 'Sheet1')
+
+
+
+
+
+// build JSON
+
+def map = [:]
+map["name"] = "Alexandar"
+map["salary"] = "200000"
+map["age"] = "27"
+
+def jsonBody = new JsonBuilder(map).toString()
+
+// build HTTP POST
+
+def url = 'https://dummy.restapiexample.com/api/v1/create'
+def post = new HttpPost(url)
+
+post.addHeader("content-type", "application/json")
+post.setEntity(new StringEntity(jsonBody))
+
+// execute 
+
+def client = HttpClientBuilder.create().build()
+def response = client.execute(post)
+
+def bufferedReader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))
+def jsonResponse = bufferedReader.getText()
+println "response: \n" + jsonResponse
+
+def slurper = new JsonSlurper()
+def resultMap = slurper.parseText(jsonResponse)
+
+assert "Alexandar" == resultMap["name"]
+assert resultMap["id"] != null
+
+
+assert responseStatusCode == 200, "Expected status code 200, but received ${responseStatusCode}"
+assert responseBody.status == 'success' , "Status in response does not match"
+assert responseBody.message == 'Successfully! Record has been added.' , "Message in response does not match"
+assert responseBody.data.name == 'Alexandar', "Name in response does not match"
+assert responseBody.data.salary == '200000', "Salary in response does not match"
+assert responseBody.data.age == '27', "Age in response does not match"
+
+assert responseStatusCode == 400, "Expected status code 400 for invalid input"
+assert responseBody.error == 'Invalid name format', "Expected error message not found"
+
+</script></con:config></con:testStep><con:setupScript>import groovy.sql.Sql
+import org.apache.poi.ss.usermodel.*
+
+@Grab(group='org.apache.httpcomponents', module='httpclient', version='4.5.2')
+
+import groovy.json.*
+
+import org.apache.http.client.methods.*
+import org.apache.http.entity.*
+import org.apache.http.impl.client.*
+
+
+
+
+
+def readExcelData(excelFilePath, sheetName) {
+    // Create a workbook instance
+    Workbook workbook = WorkbookFactory.create(new FileInputStream(excelFilePath))
+    // Access the specified worksheet
+    Sheet sheet = workbook.getSheet(sheetName)
+
+    // Create a list to store data
+    def data = []
+
+    // Iterate through rows and cells, extracting values
+    int rowCount = sheet.getLastRowNum()
+    for (int i = 1; i &lt;= rowCount; i++) {
+        Row row = sheet.getRow(i)
+        Map&lt;String, String> rowData = [:]
+        int cellCount = row.getLastCellNum()
+        for (int j = 0; j &lt; cellCount; j++) {
+            Cell cell = row.getCell(j)
+            String cellValue = cell.getStringCellValue() // Handle other cell types as needed
+            rowData.put(headerCells[j], cellValue) // Assuming headerCells is a list of column names
+        }
+        data.add(rowData)
+    }
+
+    // Close the workbook
+    workbook.close()
+
+    return data
+}
+def excelData = readExcelData('C:/Users/Neeraja/Documents/SOAPUI-GroovyScripting/TestData.xlsx', 'Sheet1')
+
+
+
+
+// build JSON
+
+def map = [:]
+map["name"] = "API"
+map["salary"] = "200000"
+map["age"] = "27"
+
+def jsonBody = new JsonBuilder(map).toString()
+
+// build HTTP POST
+
+def url = 'https://dummy.restapiexample.com/api/v1/create'
+def post = new HttpPost(url)
+
+post.addHeader("content-type", "application/json")
+post.setEntity(new StringEntity(jsonBody))
+
+// execute 
+
+def client = HttpClientBuilder.create().build()
+def response = client.execute(post)
+
+def bufferedReader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))
+def jsonResponse = bufferedReader.getText()
+println "response: \n" + jsonResponse
+
+def slurper = new JsonSlurper()
+def resultMap = slurper.parseText(jsonResponse)
+
+assert "API" == resultMap["name"]
+assert resultMap["id"] != null
+
+assert responseStatusCode == 200, "Expected status code 200, but received ${responseStatusCode}"
+assert responseBody.status == 'success', "status in response does not match"
+assert responseBody.data.name == 'API', "Name in response does not match"
+assert responseBody.data.salary == '200000', "Salary in response does not match"
+assert responseBody.data.age == '27', "Age in response does not match"
+assert responseBody.message == 'Successfully! Record has been added.', "message in response does not match"
+
+
+assert responseStatusCode == 400, "Expected status code 400 for invalid input"
+assert responseBody.error == 'Invalid name format', "Expected error message not found"
+
+
+
+
+</con:setupScript><con:properties/></con:testCase><con:properties/></con:testSuite><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/></con:soapui-project>
